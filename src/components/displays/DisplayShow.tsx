@@ -3,11 +3,16 @@ import DisplayEpisode from "./DisplayChildrenEpisode";
 import { getShowsEpisodes } from "../../utilityFunctions";
 import loadingGif from "../../assets/images/loading.gif"
 import axios from "axios";
-
-const DisplayShow = ({show, token, currentTrack, currentPlayUri, playStatus,setPlayStatus, clickPlay, displayEpisode,isLoading}) => {   
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { playlistOrAlbumProps} from "../../types/types";
+const DisplayShow = ({clickPlay, clickTrack}: playlistOrAlbumProps) => {   
     const [offset, setOffset] = useState(show.total-1);
     const [episodes, setEpisodes] = useState(show.episodes); 
-   
+    const isLoading = useSelector((state: RootState) => state.statuses.isLoading)
+    const token = useSelector((state: RootState) => state.authInfo.token)
+    const show = useSelector((state:RootState) => state.currentStates.currentShow)
+    const displayEpisode = clickTrack
     useEffect(() => {
         setEpisodes(show.episodes)
         setOffset(show.total-1);
@@ -104,15 +109,11 @@ const DisplayShow = ({show, token, currentTrack, currentPlayUri, playStatus,setP
                 null
                 }
                 {episodes.items.map((episode) => {
-                    return <DisplayEpisode   
-                          currentPlayUri={currentPlayUri}
-                          playStatus={playStatus} 
+                    return <DisplayEpisode 
                           episode={episode}
                           firstItem={firstItem}
-                          setPlayStatus={setPlayStatus}
                           clickPlay={clickPlay}
-                          showUri={show.uri}
-                          currentTrack={currentTrack}
+                          showUri={show.uri}                          
                           displayEpisode={displayEpisode}
                           offset={offset}
                           index={episodes.items.indexOf(episode)

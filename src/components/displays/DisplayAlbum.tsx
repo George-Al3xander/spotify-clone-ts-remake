@@ -2,23 +2,28 @@ import React from "react";
 import DisplayTracks from "./DisplayTracks";
 import loadingGif from "../../assets/images/loading.gif"
 import { listProps } from "../../types/types";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { playlistOrAlbumProps } from "../../types/types";
+import { changeClickStatus } from "../../redux/slices/statuses";
+import { setCurrentPlayUri } from "../../redux/slices/currentStates";
 
-const DisplayAlbum = ({list, isLoading}: listProps) => {
-    let album = list;   
-   
-    
-
+const DisplayAlbum = ({clickPlay, clickTrack}: playlistOrAlbumProps) => {
+    let album = useSelector((state: RootState) => state.currentStates.currentAlbum);   
+    const {currentPlayUri} = useSelector((state: RootState) => state.currentStates)
+    const dispatch = useDispatch();
+    const {clickStatus, isLoading} = useSelector((state: RootState) => state.statuses)
     return(
         isLoading == true ? 
 
-        <div className="loading-screen"><img src={loadingGif} alt="" /> </div>
+        <div className="spinner"></div>
 
         :
 
         <div className="list">
             <div className="list-top">
                 <div className="list-top-img">
-                <img src={album.img[300]} alt="" />    
+                <img src={album.img} alt="" />    
                 </div>  
                 <div className="list-top-titles">
                     <h2>Album</h2>
@@ -36,16 +41,17 @@ const DisplayAlbum = ({list, isLoading}: listProps) => {
 
             <div className="list-btns">      
 
-            {(props.playStatus == true && props.currentPlayUri == album.uri) ? <svg style={{fill: "var(--clr-primary)"}} onClick={(e) => {
+            {(clickStatus == true && currentPlayUri == album.uri) ? <svg style={{fill: "var(--clr-primary)"}} onClick={(e) => {
                 e.preventDefault();
-                props.setPlayStatus(false)
+                dispatch(changeClickStatus({clickStatus: false}))              
+                
             }} xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48"><path d="M370-320h60v-320h-60v320Zm160 0h60v-320h-60v320ZM480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Z"/></svg> 
 
             :  
 
             <svg onClick={() => {
-                props.clickPlay(album.uri);
-                props.setCurrentPlayUri(album.uri);
+                clickPlay(album.uri);
+                dispatch(setCurrentPlayUri({currentPlayUri: album.uri}))                
             }} xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48"><path d="m383-310 267-170-267-170v340Zm97 230q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Z"/></svg>
             }      
 
@@ -56,14 +62,10 @@ const DisplayAlbum = ({list, isLoading}: listProps) => {
 
             <div className="list-middle">
                 <DisplayTracks                         
-                        type={"album"} 
-                        currentTrack={props.currentTrack} 
-                        listUri={props.album.uri} 
-                        clickTrack={props.clickTrack}                         
+                        type={"album"}
+                        listUri={album.uri} 
+                        clickTrack={clickTrack}                         
                         array={album.tracks}
-                        currentPlay={props.currentPlay}
-                        setCurrentPlay={props.setCurrentPlay}
-                        currentPlayUri={props.currentPlayUri}
                         />                        
             </div>       
         </div>

@@ -1,12 +1,11 @@
-import React, { useRef } from "react";
+import  { useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 
 
 const DisplaySideMenuItem = ({type, item,func}: {type: string, item: {id: string, link: string, img: string, name: string, owner: string, uri: string}, func: Function}) => {    
     const {currentPlayUri} = useSelector((state: RootState) => state.currentStates)
-    const clickStatus = useSelector((state: RootState) => state.statuses.clickStatus)
-
+    const clickStatus = useSelector((state: RootState) => state.statuses.clickStatus)   
     const itemLi = useRef<HTMLLIElement>(null);    
     return <li  key={item.id} 
                 ref={itemLi}

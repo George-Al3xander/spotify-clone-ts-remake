@@ -3,8 +3,7 @@ import DisplaySideMenuItem from "./DisplaySideMenuItem";
 import { sideMenuContentProps } from "../../types/types";
 
 
-const DisplaySideMenuContent = ({type, array,  functions}: sideMenuContentProps) => {
-    
+const DisplaySideMenuContent = ({type, array,  functions}: sideMenuContentProps) => {    
     let func: Function;
     if(type == "playlist") {
         func = functions[0]

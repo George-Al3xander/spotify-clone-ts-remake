@@ -1,8 +1,7 @@
 import moment from "moment"
 import axios from "axios";
 import { unSortedTrack, sortedPlaylistTrack, episode, episodesType } from "./types/types";
-import {useSelector} from "react-redux"
-import { RootState } from "./redux/store";
+
 
 
 
@@ -30,7 +29,7 @@ export function getSortedPlaylistTracks(tracks: any[]
   ) : sortedPlaylistTrack[] {
     let sortedTracks = tracks.filter((obj) => obj.track != null && obj.track.name != "");
 
-    return sortedTracks.map((song) => {                 
+    const result = sortedTracks.map((song) => {                  
         return  {
             name: song.track.name,
             uri: song.track.uri, 
@@ -49,10 +48,11 @@ export function getSortedPlaylistTracks(tracks: any[]
             date: song.added_at,
         }
     })
+    //console.log(result)
+    return result
 }
 
-export async function getNextItems(apiId: string) :  Promise<[]>{
-  const token = useSelector((state: RootState) => state.authInfo.token)
+export async function getNextItems(token:string, apiId: string) :  Promise<[]>{ 
   const {data} = await axios.get(apiId, {
     headers: {
       Authorization: `Bearer ${token}`
@@ -60,28 +60,26 @@ export async function getNextItems(apiId: string) :  Promise<[]>{
   })
        
   if(data.next != null) {         
-      return  data.items.concat(await getNextItems(data.next));         
+      return  data.items.concat(await getNextItems(token, data.next));         
   }  else {
       return  data.items
   }      
 }
 
-export async function getNextArtists(apiId: string) : Promise<[]> {
-  const token = useSelector((state: RootState) => state.authInfo.token)
+export async function getNextArtists(token: string,apiId: string) : Promise<[]> {
   const {data} = await axios.get(apiId, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })              
        if(data.artists.next != null) {
-            return data.artists.items.concat(await  getNextArtists(data.artists.next));
+            return data.artists.items.concat(await  getNextArtists(token, data.artists.next));
         } else {
             return data.artists.items;
         }
 }
 
-export async function getFollowedStatus(tracks: sortedPlaylistTrack[]) {
-  const token = useSelector((state: RootState) => state.authInfo.token)
+export async function getFollowedStatus(token: string, tracks: sortedPlaylistTrack[]) { 
   let res: sortedPlaylistTrack[] = [];
   let result: boolean[] | sortedPlaylistTrack[] = []
   let allTracksId = tracks.map((track) => {
@@ -134,6 +132,9 @@ export async function getFollowedStatus(tracks: sortedPlaylistTrack[]) {
   } 
   
   else {
+    //console.log(tracks)
+
+    //console.log(allTracksId)
     let isFollowed = await axios.get("https://api.spotify.com/v1/me/tracks/contains", {
     headers: {
       Authorization: `Bearer ${token}`
@@ -148,17 +149,18 @@ export async function getFollowedStatus(tracks: sortedPlaylistTrack[]) {
   return result
 }
 
-export async function getPlaylistTracks(dataTracks: {items: [],next: string | null}) {
+export async function getPlaylistTracks(token:string, dataTracks: {items: [],next: string | null}) {
   //dataTracks = data.tracks
   let tracks: sortedPlaylistTrack[] =  dataTracks.items; 
   let result = []; 
   let next:  string | null = dataTracks.next;
     if(next != null) {        
-      result = [...tracks].concat(await getNextItems(next));
+      result = [...tracks].concat(await getNextItems(token, next));
     }  
     result = await getSortedPlaylistTracks(tracks);
+    console.log(result)
       
-    let isFollowedList = await getFollowedStatus(tracks);    
+    let isFollowedList = await getFollowedStatus(token, result);    
         
     let y = 0;
     let finRes:{ isFollowed: boolean | sortedPlaylistTrack; isExplicit: boolean; img: string; album: { name: string; uri: string; }; duration: number; artists: []; date: Date | string; name: string; uri: string; id: string; }[] = [];
@@ -169,8 +171,7 @@ export async function getPlaylistTracks(dataTracks: {items: [],next: string | nu
     return result
 }
 
-export async function getAlbumTracks(tracks: unSortedTrack[]) {
-  const token = useSelector((state: RootState) => state.authInfo.token)
+export async function getAlbumTracks(token:string,tracks: unSortedTrack[]) {  
     let finRes : any[] = [];
     let sortedTracks =  tracks.map((track) => {
       return {
@@ -253,8 +254,7 @@ export async function getAlbumTracks(tracks: unSortedTrack[]) {
 
 
 
-export async function getShowsEpisodes(id: string) : Promise<episodesType> {
-  const token = useSelector((state: RootState) => state.authInfo.token)
+export async function getShowsEpisodes(token:string, id: string) : Promise<episodesType> {
   const {data} = await axios.get(`https://api.spotify.com/v1/shows/${id}/episodes?limit=20`, {
       headers: {
             Authorization: `Bearer ${token}`
@@ -291,7 +291,7 @@ export async function getShowsEpisodes(id: string) : Promise<episodesType> {
   
 }
 
-export function getDateSorted(time: Date) {   
+export function getDateSorted(time: Date | string) {   
     let today = new Date();
     let trackDate = new Date(time);
     let todayDay = today.getDate();

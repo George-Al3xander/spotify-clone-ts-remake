@@ -3,16 +3,16 @@ import axios from 'axios';
 import { Route, Routes , useNavigate} from "react-router-dom";
 import useAuth from "../auth/useAuth";
 import SideMenu from "../sideMenu/SideMenu";
-// import Home from "./Home";
+import Home from "./Home";
 // import  Search  from "../search/Search";
-// import Player from "./Player";
+import Player from "./Player";
 import {getPlaylistTracks, msToTime, getAlbumTracks, getShowsEpisodes } from "../../utilityFunctions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-// import DisplayPlaylist from "../side/DisplayPlaylist";
+import DisplayPlaylist from "../displays/DisplayPlaylist";
  import { spotifyApi } from "react-spotify-web-playback";
-// import DisplayAlbum from "../side/DisplayAlbum";
-// import DisplayShow from "../side/DisplayShow";
+import DisplayAlbum from "../displays/DisplayAlbum";
+import DisplayShow from "../displays/DisplayShow";
 // import DisplayParentEpisode from "../side/DisplayParentEpisode";
 import Header from "./Header";
 import { setToken, setCurrentUser } from "../../redux/slices/authInfo";
@@ -29,9 +29,7 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
   const {clickStatus, repeatStatus} = useSelector((state: RootState) => state.statuses)
   const repeatTypes = ['off', 'context', 'track' ]
   const navigate = useNavigate();
-
-  
-    dispatch(setToken({token: useAuth(code)}));
+  dispatch(setToken({token: useAuth(code)}));
 
  // const[currentTrack, setCurrentTrack] = useState("");
   // const [currentPlayUri, setCurrentPlayUri] = useState(
@@ -62,11 +60,10 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
       img: data.images[0].url,
       id: data.id,
       uri: data.uri
-    }}))   
-    
+    }}))       
   }
-  useEffect(() => { 
-    if(Object.keys(currentUser).length < 2 && token.length > 0) {
+  useEffect(() => {     
+    if(currentUser.id.length == 0 && token.length > 0) {
       setUser();    
     } 
   }, [token])
@@ -96,7 +93,7 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
         album = JSON.parse(localStorage.getItem(id)!)
       }
       dispatch(setCurrentAlbum({currentAlbum: album}))
-    dispatch(changeLoadingStatus())
+      dispatch(changeLoadingStatus())
   }
 
   const displayPlaylist = async (id:string) : Promise<void> => {  
@@ -171,7 +168,7 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
           Authorization: `Bearer ${token}`
         },        
       }); 
-      let tracks = await  getPlaylistTracks(data.tracks);      
+      let tracks = await  getPlaylistTracks(token,data.tracks);      
       let duration = msToTime(tracks);   
       let isFollowedRes = await axios.get(`https://api.spotify.com/v1/playlists/${data.id}/followers/contains?ids=${currentUser.id}`, {
         headers: {
@@ -205,18 +202,14 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
           Authorization: `Bearer ${token}`
         },        
       });      
-      let tracks = await getAlbumTracks(data.tracks.items);
+      let tracks = await getAlbumTracks(token, data.tracks.items);
       let duration = msToTime(tracks);     
 
       return {
         artists: data.artists,
         id: data.id,
         uri: data.uri,
-            img: {
-              640: data.images[0].url,
-              300: data.images[1].url,
-              64: data.images[2].url,
-        },
+        img:  data.images[1].url,
         duration,
         tracks,
         name: data.name,
@@ -231,7 +224,7 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
           }
         })   
         
-        let episodes = await getShowsEpisodes(data.id)        
+        let episodes = await getShowsEpisodes(token, data.id)        
         let show = {
                 name: data.name,     
                 owner: data.publisher,                    
@@ -409,70 +402,43 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
     }
     
     return (
-      <>   
-       
+      <> 
       <main className="container">
-        <SideMenu             
+        {currentUser.id.length > 0 ?
+        <>
+          <SideMenu             
             playlistClick={displayPlaylist} 
             albumClick={displayAlbum}
             showClick={displayShow}            
-          />
-        <div className="content"> 
-        <Header logout={logout}/>         
-          {/*
+          />          
+        </>
+        :
+        null
+        }
+        <div className="content">
+          {currentUser.id.length > 0 ?
+          <Header logout={logout}/>         
+          :
+          null
+          } 
           <Routes>
-             <Route path="/" element={<Home />}/>
-             <Route path="/playlist"  
-             element={<DisplayPlaylist 
-                          clickPlay={clickListPlay} 
-                          currentTrack={currentTrack}  
-                          currentPlayUri={currentPlayUri}
-                          setCurrentPlayUri={setCurrentPlayUri}
-                          playlist={currentPlaylist} 
-                          clickTrack={clickTrack} 
-                          token={token}
-                          currentPlay={currentPlaylist}
-                          setCurrentPlay={setCurrentPlaylist}
-                          playStatus={clickStatus}
-                          setPlayStatus={setClickStatus} 
-                          setOffset={setOffset}
-                          isLoading={isLoading}                         
-                          />}/>
+            <Route path="/" element={<Home />}/>
+            <Route path="/playlist"  
+            element={<DisplayPlaylist 
+                         clickPlay={clickListPlay} 
+                         clickTrack={clickTrack} 
+             />}/>
              <Route path="/album" 
              element={<DisplayAlbum 
-                          clickPlay={clickListPlay} 
-                          currentTrack={currentTrack}  
-                          currentPlayUri={currentPlayUri}
-                          setCurrentPlayUri={setCurrentPlayUri}
-                          album={currentAlbum} 
-                          clickTrack={clickTrack} 
-                          token={token}
-                          currentPlay={currentAlbum}
-                          setCurrentPlay={setCurrentAlbum}
-                          playStatus={clickStatus}
-                          setPlayStatus={setClickStatus} 
-                          setOffset={setOffset}
-                          isLoading={isLoading}  
+              clickPlay={clickListPlay}
+              clickTrack={clickTrack} 
               />}/>
             <Route path="/show" 
             element={<DisplayShow 
-                          token={token}
-                          show={currentShow}
-                          currentTrack={currentEpisode}  
-                          currentPlayUri={currentPlayUri}
-                          setCurrentPlayUri={setCurrentPlayUri}
-                          setCurrentPlay={setCurrentShow}  
-                          playStatus={clickStatus}
-                          displayEpisode={displayEpisode}
-                          setPlayStatus={() => {
-                            spotifyApi.pause(token,currentDevice);
-                          }} 
-                          clickPlay={clickEpisodePlay}
-                          setOffset={setOffset}
-                          isLoading={isLoading}                         
-
-
-            />}/>
+              clickTrack={displayEpisode}               
+              clickPlay={clickEpisodePlay}     
+              />}/>
+              {/*
             <Route path="/episode" 
             element={<DisplayParentEpisode 
                           token={token}
@@ -522,27 +488,18 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
                           
                             
             />}/>
+          */}
           </Routes>          
-        */}
         </div>
       </main>
-      {/*   
+        
         <div className="player">
           <Player 
-              shuffle={shuffle} 
-              shuffleStatus={shuffleStatus} 
+              shuffle={shuffle}               
               repeat={repeat}
-              repeatStatus={repeatStatus}
-              setCurrentDevice={setCurrentDevice} 
-              uri={currentPlayUri} 
-              clickStatus={clickStatus} 
-              token={token}           
-              setRepeatStatus={setRepeatStatus}
-              setCurrentTrack={setCurrentTrack}
-              setClickStatus={setClickStatus}
-              offset={offset}
+              token={token}    
             />
-        </div> */}
+        </div>
       </>
     )
 }

@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../store'
-import type {SortedPlaylist } from '../../types/types'
+import type {SortedAlbum, SortedPlaylist } from '../../types/types'
 interface CurrentStates {    
     currentPlayUri: string,
     currentPlaylist: SortedPlaylist,
-    currentAlbum: object,
+    currentAlbum: SortedAlbum,
     currentShow: object,
     currentDisplayEpisode: object,
     currentSearch: object,
@@ -26,7 +26,7 @@ const initialState: CurrentStates = {
         followers: 0,
         owner: {
             display_name: "",
-            urls: {},
+            urls: {spotify: ""},
             id: ""
         },
         id:"",
@@ -35,9 +35,18 @@ const initialState: CurrentStates = {
         date: new Date().toISOString(),
         tracks: [], 
         duration: 0,
-        img: {}
+        img: ""
     },
-    currentAlbum: {},
+    currentAlbum: {
+        name: "",         
+        id:"",
+        uri: "",
+        artists: [],
+        date: new Date().toISOString(),
+        tracks: [], 
+        duration: 0,
+        img: ""
+    },
     currentShow: {},
     currentDisplayEpisode: {},
     currentSearch: {},    
@@ -58,7 +67,7 @@ export const infoSlice = createSlice({
             state.currentPlaylist = action.payload.currentPlaylist
         },
 
-        setCurrentAlbum: (state, action: PayloadAction<{currentAlbum: object}>) => {
+        setCurrentAlbum: (state, action: PayloadAction<{currentAlbum: SortedAlbum}>) => {
             state.currentAlbum = action.payload.currentAlbum
         },
 
@@ -91,7 +100,9 @@ export const {setCurrentPlayUri,
     setCurrentShow,
     setCurrentDisplayEpisode,
     setCurrentSearch,    
-    setCurrentEpisode} = infoSlice.actions
+    setCurrentEpisode,
+    setCurrentDevice,
+    setCurrentTrack} = infoSlice.actions
 
 export const selectInfo = (state: RootState) => state.currentStates
 

@@ -2,15 +2,26 @@ import React from "react";
 import DisplayTrack from "./DisplayTrack";
 import { spotifyApi } from "react-spotify-web-playback";
 import DisplayTrackSearch from "./DisplayTrackSearch";
+import { SortedAlbum, SortedPlaylist, displayTracksProps } from "../../types/types";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { setCurrentAlbum, setCurrentPlaylist } from "../../redux/slices/currentStates";
 
 
-const DisplayTracks = (props) => { 
-    let token = props.token;
-    let type = props.type;
-    let currentPlay = props.currentPlay;
-    let setCurrentPlay = props.setCurrentPlay;          
+const DisplayTracks = ({type, clickTrack, array, listUri}: displayTracksProps) => { 
+    const token = useSelector((state: RootState) => state.authInfo.token)
+    const dispatch = useDispatch();
+    let currentPlay: SortedPlaylist & SortedAlbum & object;
+    
+    const setCurrentPlay = (value: SortedPlaylist & SortedAlbum) => {
+        if(type == "playlist") {
+            dispatch(setCurrentPlaylist({currentPlaylist: value}))
+        } else if(type == "album") {
+            dispatch(setCurrentAlbum({currentAlbum: value}))
+        }
+    }          
 
-    const followTrack = async (id,num) => {
+    const followTrack = async (id: string,num: number) => {
         await spotifyApi.saveTracks(token, id);
         if(type != "search") {
             let temppArray = currentPlay;
@@ -18,13 +29,13 @@ const DisplayTracks = (props) => {
             setCurrentPlay(temppArray);
         }
         else {
-            let temppArray = props.resultsTracks;
-            temppArray[num].isFollowed = true;
-            props.setResultsTracks(temppArray); 
+            // let temppArray = resultsTracks;
+            // temppArray[num].isFollowed = true;
+            // setResultsTracks(temppArray); 
         }
     }
 
-    const unfollowTrack = async (id,num) => {
+    const unfollowTrack = async (id: string,num: number) => {
         await spotifyApi.removeTracks(token, id)
         if(type != "search") {
             let temppArray = currentPlay;
@@ -32,9 +43,9 @@ const DisplayTracks = (props) => {
             setCurrentPlay(temppArray);
         }
         else {
-            let temppArray = props.resultsTracks;
-            temppArray[num].isFollowed = false;
-            props.setResultsTracks(temppArray);  
+            // let temppArray = resultsTracks;
+            // temppArray[num].isFollowed = false;
+            // setResultsTracks(temppArray);  
         }
     }
     
@@ -58,34 +69,32 @@ const DisplayTracks = (props) => {
             {type == "search" ? <h1 style={{textTransform: "capitalize", fontSize: "var(--fs-big)"}}>Songs</h1> : null}
 
             <tbody>
-            {props.array.map((track, num) => {     
+            {array.map((track, num) => {     
                 return type != "search" ? 
                 <DisplayTrack 
                         followTrack={followTrack} 
                         unfollowTrack={unfollowTrack} 
-                        currentTrack={props.currentTrack} 
                         track={track} 
                         type={type} 
                         clickTrack={() => {
-                            props.clickTrack(track.uri,props.listUri,num)
+                            clickTrack(track.uri,listUri,num)
                         }} 
-                        num={num} 
-                        setOffset={props.setOffset}
-                        currentPlayUri = {props.currentPlayUri}
-                        currentPlaylistUri={props.currentPlay.uri}
+                        num={num}  
+                        
                 />
                 :
-                <DisplayTrackSearch 
-                    track={track} 
-                    currentTrack={props.currentTrack} 
-                    followTrack={followTrack} 
-                    unfollowTrack={unfollowTrack} 
-                    clickTrack={() => {
-                        props.clickTrack(track.uri,props.listUri,num)
-                    }} 
-                    num={num}
-                    playStatus={props.playStatus}
-                />  
+                // <DisplayTrackSearch 
+                //     track={track} 
+                //     currentTrack={currentTrack} 
+                //     followTrack={followTrack} 
+                //     unfollowTrack={unfollowTrack} 
+                //     clickTrack={() => {
+                //         clickTrack(track.uri,listUri,num)
+                //     }} 
+                //     num={num}
+                //     playStatus={playStatus}
+                // /> 
+                null 
                 })}
 
             </tbody>

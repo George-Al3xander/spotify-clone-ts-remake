@@ -566,8 +566,6 @@ tbody:before {
 .header {
   position: relative;
   margin: .5rem;
-  
-  
 }
 
 .header-btn {
@@ -604,6 +602,25 @@ tbody:before {
 .header ul li:hover {
   cursor: pointer;
   background-color: var(--clr-bg-light);
+}
+
+.spinner {
+  width: 64px;
+  height: 64px;
+  border: 8px solid;
+  border-color: var(--clr-primary) transparent var(--clr-primary) transparent;
+  border-radius: 50%;
+  animation: spin-anim 1.2s linear infinite;
+  margin-inline: auto;
+}
+
+@keyframes spin-anim {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 50rem) {

@@ -14,6 +14,7 @@ const Header = ({logout}: {logout: MouseEventHandler}) => {
             setStyle("flex")
         }
     }, [menuShown])
+    //console.log(user)
     return(
         <div className="header">
             <div onClick={() => {

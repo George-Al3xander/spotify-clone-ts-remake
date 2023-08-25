@@ -1,34 +1,47 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { displayTrackDuration, getDateSorted} from "../../utilityFunctions";
+import { displayTrackProps } from "../../types/types";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 
-const DisplayTrack = ({track, type, num, currentTrack, clickTrack, followTrack, unfollowTrack,currentPlaylistUri,currentPlayUri}) => {
+const DisplayTrack = ({track, num, type, followTrack, unfollowTrack, clickTrack}: displayTrackProps) => {
     const [isHovered, setIsHovered] = useState(false);
-    const item = useRef();
-    const header1 = useRef();
-    const header2= useRef();
-   
+    const item = useRef<HTMLTableRowElement>(null);
+    const header1 = useRef<HTMLHeadingElement>(null);
+    const header2 = useRef<HTMLHeadingElement>(null);
+    const {currentPlayUri,currentPlaylist, currentAlbum, currentTrack} = useSelector((state: RootState) => state.currentStates)
+    const [currentListUri, setCurrentListUri] = useState("");
+
+    useEffect(() => {
+        if(type == "playlist") {
+            setCurrentListUri(currentPlaylist.uri)
+        } else if(type == "album") {
+            setCurrentListUri(currentAlbum.uri)
+        }
+    },[type])
+    
     return(
             <tr
                 key={track.id}   
                 ref={item}                  
                 onDoubleClick={()=> {
-                    props.clickTrack(track.uri);
+                    clickTrack(track.uri);
                 }}
                 onMouseEnter={() => {                     
                     setIsHovered(true);                            
-                    item.current.style.backgroundColor = "var(--clr-bg-light)" ;
-                    header1.current.style.opacity = "1" ;
+                    item.current!.style.backgroundColor = "var(--clr-bg-light)" ;
+                    header1.current!.style.opacity = "1" ;
                     if(type == "playlist") {
-                        header2.current.style.opacity = "1" ;
+                        header2.current!.style.opacity = "1" ;
                     }
                 }} 
                 onMouseLeave={() => {                           
                     setIsHovered(false); 
-                    item.current.style.backgroundColor = "transparent"
-                    header1.current.style.opacity = ".7" ;
+                    item.current!.style.backgroundColor = "transparent"
+                    header1.current!.style.opacity = ".7" ;
                     if(type == "playlist") {
-                        header2.current.style.opacity = ".7" ;
+                        header2.current!.style.opacity = ".7" ;
                     }
                 }}
                     id={track.uri} className="track" >
@@ -37,7 +50,7 @@ const DisplayTrack = ({track, type, num, currentTrack, clickTrack, followTrack, 
                             {isHovered == false ? 
                              
 
-                             (currentTrack == track.uri && currentPlaylistUri == currentPlayUri) ?
+                             (currentTrack == track.uri && currentListUri == currentPlayUri) ?
                              <h2 style={{color: "var(--clr-primary)"}}>{num + 1}</h2> 
                              
                              :
@@ -46,7 +59,9 @@ const DisplayTrack = ({track, type, num, currentTrack, clickTrack, followTrack, 
                                                             
                              :     
                              
-                             <svg  onClick={clickTrack} xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"><path d="M336-216v-528l408 264-408 264Z"/></svg>
+                             <svg  onClick={() =>{
+                                clickTrack()
+                             }} xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"><path d="M336-216v-528l408 264-408 264Z"/></svg>
                             }
                         </td> :
                             null
@@ -62,12 +77,12 @@ const DisplayTrack = ({track, type, num, currentTrack, clickTrack, followTrack, 
                                 <td></td>}
            
                             <div className="track-name">
-                                {(currentTrack == track.uri && currentPlaylistUri == currentPlayUri) ? <h1 style={{color : "#1DB954"}}>{track.name}</h1> : <h1>{track.name}</h1> }        
+                                {(currentTrack == track.uri && currentListUri == currentPlayUri) ? <h1 style={{color : "#1DB954"}}>{track.name}</h1> : <h1>{track.name}</h1> }        
                                 <h2 ref={header1} className="track-artist">
                                     {track.isExplicit == true ? <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"><path d="M360-288h240v-72H432v-84h168v-72H432v-84h168v-72H360v384ZM216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Z"/></svg> : null }
-                                    {track.artists.map((artist) => {
+                                    {track.artists.map((artist:{name: string, external_urls: {spotify: string}}) => {
                                         return <>
-                                        <a href={artist.external_urls.spotify}>{artist.name}</a> {track.artists.indexOf(artist) != track.artists.length-1 ? ", " : null}
+                                        <a href={artist.external_urls.spotify}>{artist.name}</a> {track.artists.indexOf(artist!) != track.artists.length-1 ? ", " : null}
                                         </>
                                     })}
                                 </h2>                                
@@ -83,9 +98,7 @@ const DisplayTrack = ({track, type, num, currentTrack, clickTrack, followTrack, 
 
                             {type == "playlist" ?  
                                 <td className="track-extra-info"> 
-                                     <h2>
-                                        {getDateSorted(track.date)}
-                                    </h2>
+                                     <h2>{getDateSorted(track.date)}</h2>
                                 </td> 
                             : <td></td>}
                            

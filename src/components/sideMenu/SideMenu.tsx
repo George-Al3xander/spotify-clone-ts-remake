@@ -5,15 +5,16 @@ import DisplaySideMenuContent from "./DisplaySideMenuContent"
 import { getNextArtists, getNextItems, getShowsEpisodes, getSortedPlaylistTracks } from "../../utilityFunctions";
 
 import likedSongsCover from "../../assets/images/likedsongs.jpg"
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-
+import { play } from "@ekwoka/spotify-api";
+import { changeLoadingStatus } from "../../redux/slices/statuses";
 
 
 const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Function, albumClick: Function, showClick: Function}) => {
     
     const token = useSelector((state: RootState) => state.authInfo.token)
-    
+    const [isLoading, setIsLoading] = useState(false)
     const [searchType, setSearchType] = useState("");
     const [searchKey, setSearchKey] = useState("")
     const [fullDisplay, setFullDisplay] = useState([])
@@ -21,7 +22,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
     const [currentDisplay, setCurrentDisplay] = useState([]);
     const [currentDisplayType, setCurrentDisplayType] = useState("");
     const [isClicked, setIsClicked] = useState(false);
-
+    const dispatch = useDispatch();
     const testFunction = async () => {
         const shows = await getShows();
         let testShow = shows[1];
@@ -36,7 +37,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
         console.log(testShow.id)
     }
     
-    const getPlaylists = async () => {
+    const getPlaylists = async () => {      
         const {data} = await axios.get('https://api.spotify.com/v1/me/playlists?limit=50', {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -44,7 +45,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
         })
         let playlist = data.items;
        if(data.next != null) {
-           playlist =  playlist.concat(await getNextItems(data.next));
+           playlist =  playlist.concat(await getNextItems(token, data.next));
        }
        playlist = playlist.filter((list: {tracks: {total: number}}) => list.tracks.total > 0)       
        playlist = playlist.map((list: {name: string, owner:{display_name: string}, images: {url:string}[], uri:string,id:string}) => {
@@ -57,7 +58,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
                 uri: list.uri,
              }
         });
-       
+      // console.log(playlist)
         return playlist
     }
 
@@ -69,7 +70,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
         })
        let album = data.items;
        if(data.next != null) {
-           album =  album.concat(await getNextItems(data.next));
+           album =  album.concat(await getNextItems(token, data.next));
        }
         album = album.filter((item: {album: {name: string}}) => item.album.name != "")
         album = album.map((list: {album: {name: string, owner:{display_name: string}, images: {url:string}[], uri:string,id:string, artists: {name: string}[]}}) => {
@@ -98,7 +99,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
        let artists = data.artists.items;
 
        if(data.artists.next != null) {
-           artists = artists.concat(await getNextArtists(data.artists.next));
+           artists = artists.concat(await getNextArtists(token, data.artists.next));
            
         }        
         artists = artists.map((artist: {name: string,uri: string,id: string,images:{url: string}[], external_urls: {spotify: string}}) => {
@@ -124,7 +125,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
 
         let shows = data.items;
 
-        shows = shows.concat(await getNextItems(data.next));
+        shows = shows.concat(await getNextItems(token, data.next));
         shows = shows.map((data: {show: {name: string,uri: string,id: string,images:{url: string}[], publisher:string, description: string, explicit: boolean}}) => {
             let show = data.show;
             return {
@@ -144,6 +145,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
 
     const clickPlaylistNavBtn = async () => {
         let playlists;
+        setIsLoading(prev => !prev)
         
         if(localStorage.getItem("sidemenu_playlists") == null) {
           playlists = await getPlaylists();
@@ -164,13 +166,13 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
               localStorage.setItem("sidemenu_playlists", JSON.stringify(playlistsApi));
             }
         })
-         
+        setIsLoading(prev => !prev)         
     }
     
 
     const clickAlbumNavBtn = async () => {
         let albums;
-        
+        setIsLoading(prev => !prev)        
         if(localStorage.getItem("sidemenu_albums") == null) {
           albums = await getAlbums();
           localStorage.setItem("sidemenu_albums", JSON.stringify(albums))
@@ -190,10 +192,12 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
               localStorage.setItem("sidemenu_albums", JSON.stringify(albumsApi));
             }
         })
+        setIsLoading(prev => !prev)
     }
 
     const clickArtistsNavBtn = async () => {
         let artists;
+        setIsLoading(prev => !prev)
         
         if(localStorage.getItem("sidemenu_artists") == null) {
           artists = await getArtists();
@@ -214,10 +218,12 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
               localStorage.setItem("sidemenu_artists", JSON.stringify(artistsApi));
             }
         })
+        setIsLoading(prev => !prev)
     }
 
     const clickShowsNavBtn = async () => {
         let shows;
+        setIsLoading(prev => !prev)
         
         if(localStorage.getItem("sidemenu_shows") == null) {
           shows = await getShows();
@@ -238,6 +244,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
               localStorage.setItem("sidemenu_shows", JSON.stringify(showsApi));
             }
         })
+        setIsLoading(prev => !prev)
     }
 
     const cancelClick = () => {
@@ -269,7 +276,7 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
         })   
         let tracks = data.items;
         if(data.next != null) {
-            tracks = tracks.concat(await getNextItems(data.next));
+            tracks = tracks.concat(await getNextItems(token, data.next));
         }
         tracks = getSortedPlaylistTracks(tracks);
         console.log(tracks)
@@ -308,7 +315,8 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
             <div className="side-menu-content">                
                     <h1>Your Library</h1>    
                     <ul className="side-menu-content-nav">
-                        {isClicked == false ? <><li onClick={clickPlaylistNavBtn}>Playlist</li>
+                        {isClicked == false ? 
+                        <><li onClick={clickPlaylistNavBtn}>Playlist</li>
                         <li onClick={clickShowsNavBtn}>Podcast & Shows</li>
                         <li onClick={clickAlbumNavBtn}>Albums</li>
                         <li onClick={clickArtistsNavBtn}>Artists</li></> 
@@ -333,7 +341,11 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
                         }}/>                    
                     </div>}
 
-                    {isClicked == false ? 
+                    {
+                    isLoading ?
+                    <div className="spinner"></div>
+                    :
+                    isClicked == false ? 
                     
                     null 
                     
@@ -342,7 +354,8 @@ const SideMenu = ({playlistClick, albumClick, showClick}: {playlistClick: Functi
                             functions={[playlistClick,albumClick,showClick,artistClick]} 
                             type={currentDisplayType} 
                             array={currentDisplay}
-                        />}                    
+                    />
+                    }                    
             </div>           
         </div>
     )

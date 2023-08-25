@@ -1,9 +1,10 @@
+import { MouseEventHandler } from "react"
 
 
 
 export type typeButtonProps = {
     status: number| boolean,
-    func: () => void
+    func: Function
 }
 
 
@@ -20,19 +21,15 @@ interface IReturnItem {
     id: string,
 }
 export interface ICurrentUser extends IReturnItem{
-    link: ""
+    link: string,
     img?: string
 }
 
 interface list extends IReturnItem {
-    date: Date,
+    date: Date | string,
     tracks: [] | sortedPlaylistTrack[],
     duration: number | string,
-    img: {
-        640?: string,
-        300?: string,
-        64?: string
-    },    
+    img:  string,    
 }
 
 export interface IAlbum extends list {
@@ -64,7 +61,7 @@ export interface sortedPlaylistTrack extends IReturnItem  {
         uri: string,
     },
     duration: number,
-    artists: [],
+    artists: {name: string, external_urls: {spotify: string}}[] & [],
     date: Date | string,
     isFollowed?: boolean
 }
@@ -81,7 +78,7 @@ export interface SortedPlaylist extends list {
     followers: number,
     owner: {
         display_name: string,
-        urls: object,
+        urls: {spotify: string},
         id: string
     },
     isPublic: boolean,
@@ -89,7 +86,7 @@ export interface SortedPlaylist extends list {
 }
 
 export interface SortedAlbum extends list { 
-    artists: []    
+    artists: {name: string, external_urls: {spotify: string}}[] & [],
 }
 
 export interface SortedShow  { 
@@ -132,4 +129,27 @@ export type sideMenuContentProps = {
     functions: Function[],
     type: string,
     array: {id: string, link: string, img: string, name: string, owner: string, uri: string}[]   
+}
+
+export type playlistOrAlbumProps = {
+    clickPlay: Function,
+    clickTrack: Function
+}
+
+interface trackRelatedDisplayProps {
+    type: string,
+    clickTrack: Function
+
+}
+
+export interface displayTracksProps extends trackRelatedDisplayProps {
+    listUri: string,
+    array: sortedPlaylistTrack[],
+}
+
+export interface displayTrackProps extends trackRelatedDisplayProps {
+    followTrack: Function, 
+    unfollowTrack: Function,
+    track: sortedPlaylistTrack,
+    num: number
 }
