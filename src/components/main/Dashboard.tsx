@@ -13,11 +13,11 @@ import DisplayPlaylist from "../displays/DisplayPlaylist";
  import { spotifyApi } from "react-spotify-web-playback";
 import DisplayAlbum from "../displays/DisplayAlbum";
 import DisplayShow from "../displays/DisplayShow";
-// import DisplayParentEpisode from "../side/DisplayParentEpisode";
+import DisplayParentEpisode from "../displays/DisplayParentEpisode";
 import Header from "./Header";
 import { setToken, setCurrentUser } from "../../redux/slices/authInfo";
 import { changeClickStatus, changeLoadingStatus, changeShuffleStatus, setOffset, setRepeatStatus } from "../../redux/slices/statuses";
-import { setCurrentAlbum, setCurrentEpisode, setCurrentPlayUri, setCurrentPlaylist, setCurrentShow } from "../../redux/slices/currentStates";
+import { setCurrentAlbum, setCurrentDisplayEpisode, setCurrentEpisode, setCurrentPlayUri, setCurrentPlaylist, setCurrentShow } from "../../redux/slices/currentStates";
 import { IEpisode, SortedAlbum, SortedPlaylist, SortedShow, episodesType } from "../../types/types";
 
 
@@ -155,7 +155,8 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
     } else {
       episode =  JSON.parse(localStorage.getItem(id)!)
     }
-    dispatch(setCurrentEpisode({currentEpisode: episode}))
+    console.log(episode)
+    dispatch(setCurrentDisplayEpisode({currentDisplayEpisode: episode}))
     dispatch(changeLoadingStatus());   
   }
  
@@ -438,27 +439,16 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
               clickTrack={displayEpisode}               
               clickPlay={clickEpisodePlay}     
               />}/>
-              {/*
             <Route path="/episode" 
             element={<DisplayParentEpisode 
-                          token={token}
-                          episode={currentDisplayEpisode}
-                          currentTrack={currentEpisode}  
-                          currentPlayUri={currentPlayUri}
-                          setCurrentPlayUri={setCurrentPlayUri}
-                          setCurrentPlay={setCurrentDisplayEpisode}  
-                          setPlayStatus={() => {
-                            setClickStatus(false)
-                          }}
-                          playStatus={clickStatus} 
-                          clickPlay = {clickParentEpisodePlay}
-                          displayShow={displayShow}
-                          isLoading={isLoading}
-
-                          
-
-            />}            
+             
+              
+              clickPlay = {clickParentEpisodePlay}
+              displayShow={displayShow}
+            
+              />}            
             />
+              {/*
             <Route path="/search"  
             element={<Search 
                           token={token}

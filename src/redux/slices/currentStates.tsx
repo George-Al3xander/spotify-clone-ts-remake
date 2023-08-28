@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../store'
-import type {SortedAlbum, SortedPlaylist } from '../../types/types'
+import type {IEpisode, SortedAlbum, SortedPlaylist, SortedShow } from '../../types/types'
 interface CurrentStates {    
     currentPlayUri: string,
     currentPlaylist: SortedPlaylist,
     currentAlbum: SortedAlbum,
-    currentShow: object,
-    currentDisplayEpisode: object,
+    currentShow: SortedShow,
+    currentDisplayEpisode: IEpisode,
     currentSearch: object,
     currentEpisode: string,
     currentTrack: string,
@@ -47,8 +47,11 @@ const initialState: CurrentStates = {
         duration: 0,
         img: ""
     },
-    currentShow: {},
-    currentDisplayEpisode: {},
+    currentShow: 
+        {id: "", name: "",uri: "", owner: "", description: "", episodes: {items: [], next: "", previous: ""}, isExplicit: false,img: "",total: 0
+        },
+    currentDisplayEpisode: {id: "", name: "",uri: "",  description: "", isExplicit: false,img: "",date: new Date().toISOString(),
+    duration: 0, podcast: {name: "", id:"",uri: "",total: 0}},
     currentSearch: {},    
     currentEpisode: "",
     currentTrack: "",
@@ -71,11 +74,11 @@ export const infoSlice = createSlice({
             state.currentAlbum = action.payload.currentAlbum
         },
 
-        setCurrentShow: (state, action: PayloadAction<{currentShow: object}>) => {
+        setCurrentShow: (state, action: PayloadAction<{currentShow: SortedShow}>) => {
             state.currentShow = action.payload.currentShow
         },
 
-        setCurrentDisplayEpisode: (state, action: PayloadAction<{currentDisplayEpisode: object}>) => {
+        setCurrentDisplayEpisode: (state, action: PayloadAction<{currentDisplayEpisode: IEpisode}>) => {
             state.currentDisplayEpisode = action.payload.currentDisplayEpisode
         },
 

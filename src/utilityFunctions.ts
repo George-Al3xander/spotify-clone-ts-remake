@@ -336,8 +336,8 @@ function padTo2Digits(num: number) : string {
   return num.toString().padStart(2, '0');
 }
 
-export function displayEpisodeDuration(millis: number): string {
-  let seconds = Math.floor(millis / 1000);
+export function displayEpisodeDuration(millis: number | string | Number): string {
+  let seconds = Math.floor(Number(millis) / 1000);
   let minutes = Math.floor(seconds / 60);
   let hours = Math.floor(minutes / 60);
 
@@ -351,7 +351,7 @@ export function displayEpisodeDuration(millis: number): string {
   )}`;
 }
 
-export function displayEpisodeDate (date: Date) {
+export function displayEpisodeDate (date: Date | string) {
     let today = new Date();
     let episodeDate = new Date(date);    
     if(episodeDate.getFullYear() != today.getFullYear()) {

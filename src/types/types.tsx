@@ -1,13 +1,7 @@
-import { MouseEventHandler } from "react"
-
-
-
 export type typeButtonProps = {
     status: number| boolean,
     func: Function
 }
-
-
 
 export type listProps = {
     list: IAlbum | IPlaylist,    
@@ -20,6 +14,7 @@ interface IReturnItem {
     uri: string,
     id: string,
 }
+
 export interface ICurrentUser extends IReturnItem{
     link: string,
     img?: string
@@ -85,8 +80,13 @@ export interface SortedPlaylist extends list {
     isFollowed?: boolean
 }
 
+export interface IArtists {
+    name: string, 
+    external_urls: {spotify: string}
+}
+
 export interface SortedAlbum extends list { 
-    artists: {name: string, external_urls: {spotify: string}}[] & [],
+    artists: IArtists[] | [],
 }
 
 export interface SortedShow  { 
@@ -95,7 +95,7 @@ export interface SortedShow  {
         display_name: string,
         urls: object,
         id: string
-    },                    
+    } & string,
     img: string,                
     id: string,
     uri: string,
@@ -106,14 +106,14 @@ export interface SortedShow  {
 }
 
 export type episodesType = {   
-    items: [],
+    items: IEpisode[],
     next: string,
     previous: string  
 }
 
 export interface IEpisode extends IReturnItem {
     img: string,
-    date: Date,
+    date: Date | string,
     description: string
     isExplicit:boolean,
     duration: string | number,
@@ -123,6 +123,15 @@ export interface IEpisode extends IReturnItem {
         id: string,
         total: number
     }
+}
+
+
+export interface IUnsortedEpisode extends IReturnItem {
+    images: {url: string}[],
+    release_date: Date,
+    description: string,
+    duration_ms: number,
+    explicit: boolean
 }
 
 export type sideMenuContentProps = {
@@ -139,7 +148,6 @@ export type playlistOrAlbumProps = {
 interface trackRelatedDisplayProps {
     type: string,
     clickTrack: Function
-
 }
 
 export interface displayTracksProps extends trackRelatedDisplayProps {
@@ -153,3 +161,15 @@ export interface displayTrackProps extends trackRelatedDisplayProps {
     track: sortedPlaylistTrack,
     num: number
 }
+
+
+export type DisplayEpisodeChildrenProps = {
+    episode: IEpisode,
+    showUri: string,    
+    firstItemRef: React.RefObject<HTMLImageElement>,
+    index: number,
+    offset: number | Number,    
+    displayEpisode: Function,
+    clickPlay: Function,
+}
+
