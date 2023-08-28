@@ -1,8 +1,9 @@
 import React from "react";
-import { displayEpisodeDate } from "../../../utilityFunctions";
+import { displayEpisodeDate } from "../../utilityFunctions";
 import moment from "moment";
+import { IArtists } from "../../types/types";
 
-const DisplaySearchItem = ({item, type, func}) => {    
+const DisplaySearchItem = ({item, type, func}: {item: any, type: string, func: Function}) => {    
     return(
         <div onClick={() => {
             if(type != "artists") {
@@ -21,7 +22,7 @@ const DisplaySearchItem = ({item, type, func}) => {
             <h2>
             {type == "albums" ? 
             
-            item.owner.map((artist) => {
+            item.owner.map((artist: IArtists) => {
                 return <>
                     <a href={artist.external_urls.spotify}>{artist.name}</a> {item.owner.indexOf(artist) != item.owner.length-1 ? ", " : null}
                     </>

@@ -7,6 +7,7 @@ import Home from "./Home";
 // import  Search  from "../search/Search";
 import Player from "./Player";
 import {getPlaylistTracks, msToTime, getAlbumTracks, getShowsEpisodes } from "../../utilityFunctions";
+import Search from "../search/Search";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import DisplayPlaylist from "../displays/DisplayPlaylist";
@@ -448,37 +449,29 @@ const Dashboard = ({code, setCode}: {code: string, setCode: React.Dispatch<React
             
               />}            
             />
-              {/*
+             
             <Route path="/search"  
             element={<Search 
-                          token={token}
+                         
                           displayAlbum={displayAlbum}
                           displayPlaylist={displayPlaylist}
                           displayShow={displayShow}
                           displayEpisode={displayEpisode}
-                          currentTrack={currentTrack}  
-                          clickTrack={(trackUri) => {
+                          clickTrack={(trackUri: string) => {
                             if(currentTrack == trackUri) {
                               if(clickStatus == false) {
-                                setClickStatus(true);
+                                dispatch(changeClickStatus({clickStatus: true}));
                               } else {
-                                setClickStatus(false);
+                                dispatch(changeClickStatus({clickStatus : false}));
                               }
                             } else {
-                              setCurrentPlayUri(trackUri);
-                              setOffset(0);
-                              setClickStatus(true);
+                              dispatch(setCurrentPlayUri({currentPlayUri: trackUri}))
+                              dispatch(setOffset({offset: 0}))
+                              dispatch(changeClickStatus({clickStatus:true}));
                             }
-                          }} 
-                          playStatus={clickStatus}
-                          currentPlay={currentSearch}
-                          setCurrentPlay={setCurrentSearch}
-                          currentPlayUri={currentPlayUri}
-                          
-                          
-                            
+                          }}
             />}/>
-          */}
+        
           </Routes>          
         </div>
       </main>

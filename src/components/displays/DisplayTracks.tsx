@@ -8,7 +8,7 @@ import { RootState } from "../../redux/store";
 import { setCurrentAlbum, setCurrentPlaylist } from "../../redux/slices/currentStates";
 
 
-const DisplayTracks = ({type, clickTrack, array, listUri}: displayTracksProps) => { 
+const DisplayTracks = ({type, clickTrack, array, listUri, setResultsTracks, resultsTracks}: displayTracksProps) => { 
     const token = useSelector((state: RootState) => state.authInfo.token)
     const dispatch = useDispatch();
     let currentPlay: SortedPlaylist & SortedAlbum & object;
@@ -29,9 +29,13 @@ const DisplayTracks = ({type, clickTrack, array, listUri}: displayTracksProps) =
             setCurrentPlay(temppArray);
         }
         else {
-            // let temppArray = resultsTracks;
-            // temppArray[num].isFollowed = true;
-            // setResultsTracks(temppArray); 
+             let temppArray = resultsTracks;
+             if(temppArray) {
+                 temppArray[num].isFollowed = true;
+                 if(setResultsTracks) {
+                     setResultsTracks(temppArray); 
+                 }
+             }
         }
     }
 
@@ -43,9 +47,13 @@ const DisplayTracks = ({type, clickTrack, array, listUri}: displayTracksProps) =
             setCurrentPlay(temppArray);
         }
         else {
-            // let temppArray = resultsTracks;
-            // temppArray[num].isFollowed = false;
-            // setResultsTracks(temppArray);  
+            let temppArray = resultsTracks;
+            if(temppArray) {
+                temppArray[num].isFollowed = false;
+                if(setResultsTracks) {
+                    setResultsTracks(temppArray);  
+                }
+            }
         }
     }
     
@@ -83,17 +91,16 @@ const DisplayTracks = ({type, clickTrack, array, listUri}: displayTracksProps) =
                         
                 />
                 :
-                // <DisplayTrackSearch 
-                //     track={track} 
-                //     currentTrack={currentTrack} 
-                //     followTrack={followTrack} 
-                //     unfollowTrack={unfollowTrack} 
-                //     clickTrack={() => {
-                //         clickTrack(track.uri,listUri,num)
-                //     }} 
-                //     num={num}
-                //     playStatus={playStatus}
-                // /> 
+                <DisplayTrackSearch 
+                    followTrack={followTrack} 
+                    unfollowTrack={unfollowTrack} 
+                    track={track}
+                    type={type}
+                    clickTrack={() => {
+                        clickTrack(track.uri,listUri,num)
+                    }} 
+                    num={num}
+                /> 
                 null 
                 })}
 

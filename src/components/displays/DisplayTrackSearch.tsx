@@ -1,17 +1,26 @@
 import React, {useRef, useState} from "react";
 import { displayTrackDuration} from "../../utilityFunctions";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { IArtists, displayTrackProps, sortedPlaylistTrack } from "../../types/types";
 
-const DisplayTrackSearch = ({track,currentTrack, clickTrack, followTrack, unfollowTrack, playStatus,num}) => {    
+const DisplayTrackSearch = ({track, clickTrack, followTrack, unfollowTrack, num}: displayTrackProps) => {    
     const [isHovered, setIsHovered] = useState(false);
-    const item = useRef();
-    const itemImg = useRef();
-    const header1 = useRef();    
-    if(currentTrack == track.uri && playStatus == true) {
-        itemImg.current.style.opacity = ".3"
+    const itemRef = useRef<HTMLTableRowElement>(null);
+    const itemImgRef = useRef<HTMLImageElement>(null);
+    const header1Ref = useRef<HTMLHeadingElement>(null); 
+
+    const item = itemRef.current!;
+    const itemImg = itemImgRef.current!;
+    const header1 = header1Ref.current!; 
+    const {currentTrack} = useSelector((state: RootState) => state.currentStates)
+    const {clickStatus} = useSelector((state: RootState) => state.statuses)   
+    if(currentTrack == track.uri && clickStatus == true) {
+        itemImg.style.opacity = ".3"
     } 
     else {
-        if(itemImg.current  != undefined) {
-            itemImg.current.style.opacity = "1"
+        if(itemImg  != undefined) {
+            itemImg.style.opacity = "1"
         }
 
     }
@@ -19,41 +28,47 @@ const DisplayTrackSearch = ({track,currentTrack, clickTrack, followTrack, unfoll
         <tr 
             
             key={track.id}   
-            ref={item}                  
+            ref={itemRef}                  
             onDoubleClick={()=> {
-                props.clickTrack(track.uri);
+                clickTrack(track.uri);
             }}
             onMouseEnter={() => {                     
                 setIsHovered(true);                            
-                item.current.style.backgroundColor = "var(--clr-bg-light)" ;
-                header1.current.style.opacity = "1";                
-                itemImg.current.style.opacity = ".3";
+                item.style.backgroundColor = "var(--clr-bg-light)" ;
+                header1.style.opacity = "1";                
+                itemImg.style.opacity = ".3";
             }} 
             onMouseLeave={() => {                           
                 setIsHovered(false); 
-                item.current.style.backgroundColor = "transparent"
-                header1.current.style.opacity = ".7";                
-                itemImg.current.style.opacity = "1";
+                item.style.backgroundColor = "transparent"
+                header1.style.opacity = ".7";                
+                itemImg.style.opacity = "1";
             }}
                 id={track.uri} className="track track-search" >
                     
                     <td className="track-main-info">
-                        <div className="search-track-btn"><img ref={itemImg} src={track.img} alt="Album cover" />
+                        <div className="search-track-btn"><img ref={itemImgRef} src={track.img} alt="Album cover" />
                         {isHovered == true ? 
-                            (currentTrack == track.uri && playStatus == true) ?
+                            (currentTrack == track.uri && clickStatus == true) ?
                         
-                            <svg onClick={clickTrack} xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Z"/></svg>
+                            <svg onClick={() => {
+                                clickTrack();
+                            }} xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Z"/></svg>
 
                             :
-                            <svg   onClick={clickTrack} xmlns="http://www.w3.org/2000/svg" height="25" viewBox="0 -960 960 960" width="25"><path d="M336-216v-528l408 264-408 264Z"/></svg>
+                            <svg   onClick={() => {
+                                clickTrack();
+                            }} xmlns="http://www.w3.org/2000/svg" height="25" viewBox="0 -960 960 960" width="25"><path d="M336-216v-528l408 264-408 264Z"/></svg>
                         
                             
                         : 
 
 
-                            (currentTrack == track.uri && playStatus == true) ?
+                            (currentTrack == track.uri && clickStatus == true) ?
                         
-                            <svg onClick={clickTrack} xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Z"/></svg>
+                            <svg onClick={() => {
+                                clickTrack();
+                            }} xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Z"/></svg>
 
                             :
                             
@@ -64,9 +79,9 @@ const DisplayTrackSearch = ({track,currentTrack, clickTrack, followTrack, unfoll
                                              
                         <td className="track-name">
                             {currentTrack == track.uri ? <h1 style={{color : "#1DB954"}}>{track.name}</h1> : <h1>{track.name}</h1> }        
-                            <h2 ref={header1} className="track-artist">
+                            <h2 ref={header1Ref} className="track-artist">
                                 {track.isExplicit == true ? <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"><path d="M360-288h240v-72H432v-84h168v-72H432v-84h168v-72H360v384ZM216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Z"/></svg> : null }
-                                {track.artists.map((artist) => {
+                                {track.artists.map((artist: {name: string,external_urls: {spotify: string}}) => {
                                     return <>
                                     <a href={artist.external_urls.spotify}>{artist.name}</a> {track.artists.indexOf(artist) != track.artists.length-1 ? ", " : null}
                                     </>

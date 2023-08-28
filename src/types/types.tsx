@@ -1,3 +1,5 @@
+import { Dispatch } from "@reduxjs/toolkit"
+
 export type typeButtonProps = {
     status: number| boolean,
     func: Function
@@ -95,7 +97,7 @@ export interface SortedShow  {
         display_name: string,
         urls: object,
         id: string
-    } & string,
+    } | string,
     img: string,                
     id: string,
     uri: string,
@@ -153,6 +155,8 @@ interface trackRelatedDisplayProps {
 export interface displayTracksProps extends trackRelatedDisplayProps {
     listUri: string,
     array: sortedPlaylistTrack[],
+    setResultsTracks?:React.Dispatch<React.SetStateAction<sortedPlaylistTrack[]>>,
+    resultsTracks?: sortedPlaylistTrack[]
 }
 
 export interface displayTrackProps extends trackRelatedDisplayProps {
@@ -173,3 +177,25 @@ export type DisplayEpisodeChildrenProps = {
     clickPlay: Function,
 }
 
+export type searchPageProps = {
+    displayAlbum: Function, 
+    displayPlaylist: Function,
+    displayShow: Function,
+    displayEpisode: Function, 
+    clickTrack: Function
+}
+
+
+export interface searchResUnsorted extends IReturnItem {
+
+}
+
+// song: {name: string,uri: string,id: string,explicit: boolean, duration_ms: number, artists: [], 
+//     album: {images: {url:string}[], name: string, uri: string}}
+
+
+//     (list: {name: string,uri:string,id: string,owner: {
+//         display_name: string,
+//         urls: object,
+//         id: string
+//     },images: {url: string}[]})
